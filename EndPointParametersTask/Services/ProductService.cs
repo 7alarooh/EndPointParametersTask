@@ -54,6 +54,7 @@ namespace EndPointParametersTask.Services
             // Map Product entity to OutputProductDTO
             return new OutputProductDTO
             {
+                Id = product.Id, // Map the generated Id
                 Name = product.Name,
                 Price = product.Price,
                 Category = product.Category,
