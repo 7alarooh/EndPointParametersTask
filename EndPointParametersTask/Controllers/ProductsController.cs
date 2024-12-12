@@ -29,7 +29,8 @@ namespace EndPointParametersTask.Controllers
         public async Task<IActionResult> GetProductById(int id)
         {
             var product = await _service.GetProductByIdAsync(id);
-            if (product == null) return NotFound();
+            if (product == null)
+                return NotFound(new { Message = "Product not found." });
             return Ok(product);
         }
 
@@ -37,7 +38,14 @@ namespace EndPointParametersTask.Controllers
         public async Task<IActionResult> AddProduct([FromBody] InputProductDTO productDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(new { Errors = errors });
+            }
 
             var product = await _service.AddProductAsync(productDto);
             return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
@@ -47,10 +55,18 @@ namespace EndPointParametersTask.Controllers
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] InputProductDTO productDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(new { Errors = errors });
+            }
 
             var updatedProduct = await _service.UpdateProductAsync(id, productDto);
-            if (updatedProduct == null) return NotFound();
+            if (updatedProduct == null)
+                return NotFound(new { Message = "Product not found for update." });
 
             return Ok(updatedProduct);
         }
@@ -59,7 +75,8 @@ namespace EndPointParametersTask.Controllers
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var success = await _service.DeleteProductAsync(id);
-            if (!success) return NotFound();
+            if (!success) 
+                return NotFound(new { Message = "Product not found for deletion." });
 
             return NoContent();
         }
