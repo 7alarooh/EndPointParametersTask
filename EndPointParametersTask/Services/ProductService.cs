@@ -1,5 +1,6 @@
-﻿using EndPointParametersTask.Models.DTOs;
+﻿using AutoMapper;
 using EndPointParametersTask.Models;
+using EndPointParametersTask.Models.DTOs;
 using EndPointParametersTask.Repositories;
 
 namespace EndPointParametersTask.Services
@@ -8,78 +9,43 @@ namespace EndPointParametersTask.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _repository;
-        // Constructor for ProductService.
-        public ProductService(IProductRepository repository)
+        private readonly IMapper _mapper;
+
+        public ProductService(IProductRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<OutputProductDTO>> GetAllProductsAsync(int pageNumber, int pageSize)
         {
             var products = await _repository.GetAllAsync(pageNumber, pageSize);
-            // Map Product entities to OutputProductDTOs
-            return products.Select(p => new OutputProductDTO
-            {
-                Name = p.Name,
-                Price = p.Price,
-                Category = p.Category,
-                DateAdded = p.DateAdded
-            });
+            return _mapper.Map<IEnumerable<OutputProductDTO>>(products);
         }
 
         public async Task<OutputProductDTO?> GetProductByIdAsync(int id)
         {
             var product = await _repository.GetByIdAsync(id);
-            if (product == null) return null;
-            // Map Product entity to OutputProductDTO
-            return new OutputProductDTO
-            {
-                Name = product.Name,
-                Price = product.Price,
-                Category = product.Category,
-                DateAdded = product.DateAdded
-            };
+            return product == null ? null : _mapper.Map<OutputProductDTO>(product);
         }
 
         public async Task<OutputProductDTO> AddProductAsync(InputProductDTO productDto)
-        {// Map InputProductDTO to Product entity
-            var product = new Product
-            {
-                Name = productDto.Name,
-                Price = productDto.Price,
-                Category = productDto.Category ?? "General"
-            };
-
+        {
+            var product = _mapper.Map<Product>(productDto);
             await _repository.AddAsync(product);
-            // Map Product entity to OutputProductDTO
-            return new OutputProductDTO
-            {
-                Id = product.Id, // Map the generated Id
-                Name = product.Name,
-                Price = product.Price,
-                Category = product.Category,
-                DateAdded = product.DateAdded
-            };
+            return _mapper.Map<OutputProductDTO>(product);
         }
 
         public async Task<OutputProductDTO?> UpdateProductAsync(int id, InputProductDTO productDto)
         {
             var product = await _repository.GetByIdAsync(id);
             if (product == null) return null;
-            // Update Product entity with new data
-            product.Name = productDto.Name;
-            product.Price = productDto.Price;
-            product.Category = productDto.Category ?? product.Category;
 
+            // Update product properties using AutoMapper
+            _mapper.Map(productDto, product);
             await _repository.UpdateAsync(product);
-            // Map updated Product entity to OutputProductDTO
-            return new OutputProductDTO
-            {
-                Name = product.Name,
-                Price = product.Price,
-                Category = product.Category,
-                DateAdded = product.DateAdded
-            };
+
+            return _mapper.Map<OutputProductDTO>(product);
         }
 
         public async Task<bool> DeleteProductAsync(int id)

@@ -2,6 +2,7 @@
 using EndPointParametersTask.Repositories;
 using EndPointParametersTask.Services;
 using Microsoft.EntityFrameworkCore;
+using EndPointParametersTask.Helpers;
 
 namespace EndPointParametersTask
 {
@@ -10,7 +11,8 @@ namespace EndPointParametersTask
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            // Register AutoMapper
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
             // Add services to the container.
             builder.Services.AddDbContext<ProductDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
