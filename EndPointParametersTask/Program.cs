@@ -19,6 +19,8 @@ namespace EndPointParametersTask
             // Register the repository and service for dependency injection
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+
             // Add controllers
             builder.Services.AddControllers();
             // Add Swagger for API documentation
